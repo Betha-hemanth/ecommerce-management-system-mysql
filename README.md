@@ -1,1 +1,352 @@
-# ecommerce-management-system-mysql
+# 🛒 Online E-Commerce Management System
+
+## 📌 Project Overview
+
+The **Online E-Commerce Management System** is a relational database project built using **MySQL**. It is designed to manage the core operations of an online shopping platform, including customers, addresses, products, categories, orders, order items, payments, reviews, coupons, and discounts.
+
+The project demonstrates practical SQL and relational database concepts such as **primary keys, foreign keys, joins, aggregate functions, GROUP BY, HAVING, subqueries, CASE statements, constraints, and transactions**.
+
+---
+
+## 🎯 Project Objectives
+
+- Manage customer information and multiple customer addresses
+- Organize products into categories
+- Maintain product prices, stock, and seller information
+- Manage customer orders and ordered products
+- Track payments and payment status
+- Store product reviews and ratings
+- Manage discount coupons
+- Generate useful business reports using SQL queries
+- Practice relational database design and SQL problem solving
+
+---
+
+## 🗂️ Database Name
+
+```sql
+ecommerce_management
+```
+
+---
+
+## 🏗️ Database Tables
+
+The database contains the following 10 tables:
+
+| Table | Purpose |
+|---|---|
+| `customers` | Stores customer details |
+| `addresses` | Stores customer home/office addresses |
+| `categories` | Stores product categories |
+| `products` | Stores product information and inventory |
+| `orders` | Stores customer orders |
+| `order_items` | Stores products included in each order |
+| `payments` | Stores payment information |
+| `reviews` | Stores customer product reviews |
+| `coupons` | Stores discount coupon details |
+| `order_coupons` | Connects orders with applied coupons |
+
+```mermaid
+pie showData
+    title Tables by Domain
+    "Customer (customers, addresses)" : 2
+    "Catalog (products, categories)" : 2
+    "Ordering (orders, order_items)" : 2
+    "Payments" : 1
+    "Reviews" : 1
+    "Coupons (coupons, order_coupons)" : 2
+```
+
+---
+
+## 🔗 Database Relationships (ER Diagram)
+
+```mermaid
+erDiagram
+    CUSTOMERS ||--o{ ADDRESSES : has
+    CUSTOMERS ||--o{ ORDERS : places
+    CUSTOMERS ||--o{ REVIEWS : writes
+
+    CATEGORIES ||--o{ PRODUCTS : classifies
+    PRODUCTS ||--o{ ORDER_ITEMS : "included in"
+    PRODUCTS ||--o{ REVIEWS : receives
+
+    ORDERS ||--o{ ORDER_ITEMS : contains
+    ORDERS ||--o{ PAYMENTS : "paid via"
+    ORDERS ||--o{ ORDER_COUPONS : applies
+
+    COUPONS ||--o{ ORDER_COUPONS : "redeemed in"
+
+    CUSTOMERS {
+        int customer_id PK
+        string name
+        string email
+    }
+    ADDRESSES {
+        int address_id PK
+        int customer_id FK
+        string city
+    }
+    CATEGORIES {
+        int category_id PK
+        string name
+    }
+    PRODUCTS {
+        int product_id PK
+        int category_id FK
+        decimal price
+        int stock
+    }
+    ORDERS {
+        int order_id PK
+        int customer_id FK
+        date order_date
+    }
+    ORDER_ITEMS {
+        int order_item_id PK
+        int order_id FK
+        int product_id FK
+        int quantity
+    }
+    PAYMENTS {
+        int payment_id PK
+        int order_id FK
+        string status
+    }
+    REVIEWS {
+        int review_id PK
+        int customer_id FK
+        int product_id FK
+        int rating
+    }
+    COUPONS {
+        int coupon_id PK
+        string code
+        decimal discount
+    }
+    ORDER_COUPONS {
+        int order_id FK
+        int coupon_id FK
+    }
+```
+
+---
+
+## 🧠 SQL Concepts Practiced
+
+```mermaid
+mindmap
+  root((SQL<br/>Concepts))
+    Basic SQL
+      CREATE DATABASE
+      CREATE TABLE
+      INSERT
+      SELECT
+      UPDATE
+      DELETE
+    Filtering & Sorting
+      WHERE
+      AND / OR
+      IN
+      BETWEEN
+      LIKE
+      ORDER BY
+      LIMIT
+    Aggregate Functions
+      COUNT
+      SUM
+      AVG
+      MIN
+      MAX
+    Grouping
+      GROUP BY
+      HAVING
+    Joins
+      INNER JOIN
+      LEFT JOIN
+      RIGHT JOIN
+      Multi-table JOINs
+    Advanced SQL
+      Subqueries
+      CASE
+      COALESCE
+      NULL handling
+      Views
+      Indexes
+      Transactions
+```
+
+---
+
+## 📊 Example Business Queries
+
+The project can answer questions such as:
+
+| # | Business Question | SQL Concept Used |
+|---|---|---|
+| 1 | What are the 5 most expensive products? | ORDER BY + LIMIT |
+| 2 | How many customers are registered? | COUNT() |
+| 3 | How many products are available? | COUNT() |
+| 4 | What is the average product price? | AVG() |
+| 5 | What is the most expensive product? | MAX() / ORDER BY |
+| 6 | What is the cheapest product? | MIN() / ORDER BY |
+| 7 | What is the total value of current inventory? | SUM(price × stock) |
+| 8 | What is the average price per category? | GROUP BY + AVG() |
+| 9 | Which cities have more than 3 customers? | GROUP BY + HAVING |
+| 10 | How many orders has each customer placed? | JOIN + GROUP BY + COUNT() |
+| 11 | What is the revenue generated by each product? | JOIN + SUM() |
+| 12 | Which categories average above ₹5,000? | GROUP BY + HAVING |
+| 13 | Which customer has spent the most money? | JOIN + SUM() + ORDER BY |
+| 14 | Which product has the highest quantity sold? | JOIN + SUM() + ORDER BY |
+| 15 | What is the monthly revenue? | GROUP BY (date part) |
+| 16 | Which products have never been sold? | LEFT JOIN + IS NULL |
+| 17 | How can customers be classified by spending? | CASE + subquery |
+
+```mermaid
+flowchart LR
+    Q[Business Question] --> T{What kind of answer?}
+    T -->|Single number / ranking| AGG[Aggregate Function\nCOUNT · SUM · AVG · MIN · MAX]
+    T -->|Per-group breakdown| GRP[GROUP BY + HAVING]
+    T -->|Data across tables| JN[JOIN\nINNER · LEFT · RIGHT]
+    T -->|Conditional bucket| CS[CASE Statement]
+    T -->|"Missing" data e.g. never sold| LJ[LEFT JOIN + IS NULL]
+    AGG --> R[Result]
+    GRP --> R
+    JN --> R
+    CS --> R
+    LJ --> R
+```
+
+---
+
+## ⭐ Customer Spending Classification
+
+Customers are categorized using a `CASE` statement:
+
+```mermaid
+flowchart LR
+    A["₹0 – ₹10,000"] --> Regular
+    B["₹10,001 – ₹50,000"] --> Silver
+    C["₹50,001 – ₹1,00,000"] --> Gold
+    D["Above ₹1,00,000"] --> Platinum
+
+    classDef regular fill:#cfd8dc,color:#000;
+    classDef silver fill:#b0bec5,color:#000;
+    classDef gold fill:#ffd54f,color:#000;
+    classDef platinum fill:#8a1538,color:#fff;
+    class Regular regular;
+    class Silver silver;
+    class Gold gold;
+    class Platinum platinum;
+```
+
+---
+
+## 🛠️ Technologies Used
+
+| Layer | Technology |
+|---|---|
+| Database | MySQL |
+| Language | SQL |
+| Design | Relational Database / ER Model |
+| Version Control | Git & GitHub |
+
+---
+
+## 🚀 How to Run the Project
+
+```mermaid
+flowchart TD
+    A["1. Clone the repository"] --> B["2. Open MySQL client\n(Workbench / CLI)"]
+    B --> C["3. CREATE DATABASE ecommerce_management;\nUSE ecommerce_management;"]
+    C --> D["4. Run online_ecommerece_management.sql"]
+    D --> E["5. SHOW TABLES; to verify"]
+    E --> F["6. Start practicing queries\nSELECT · JOIN · GROUP BY · HAVING · CASE · subqueries"]
+```
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Betha-hemanth/ecommerce-management-system-mysql.git
+```
+
+### 2. Open MySQL
+
+Open MySQL Workbench, MySQL CLI, or another MySQL client.
+
+### 3. Create and select the database
+
+```sql
+CREATE DATABASE ecommerce_management;
+USE ecommerce_management;
+```
+
+### 4. Run the SQL file
+
+Open:
+
+```text
+online_ecommerece_management.sql
+```
+
+Execute the SQL script to create the tables and insert the project data.
+
+### 5. Verify the tables
+
+```sql
+SHOW TABLES;
+```
+
+### 6. Start practicing queries
+
+Use the database to execute SELECT, JOIN, GROUP BY, HAVING, subquery, CASE, and other SQL queries.
+
+---
+
+## 📁 Repository Contents
+
+```text
+ecommerce-management-system-mysql/
+│
+├── ER diagram for online ecommerce management.mwb
+├── online_ecommerece_management.sql
+└── README.md
+```
+
+---
+
+## 📈 Future Enhancements
+
+```mermaid
+flowchart LR
+    MySQL --> Java --> JDBC --> SpringBoot["Spring Boot"] --> REST["REST API"] --> Frontend
+```
+
+Possible future features:
+
+```mermaid
+mindmap
+  root((Future<br/>Features))
+    User Authentication
+    Product Search & Filtering
+    Shopping Cart
+    Order Tracking
+    Online Payment Integration
+    Admin Dashboard
+    REST APIs
+    Web-based Frontend
+```
+
+---
+
+## 👨‍💻 Author
+
+**Betha Hemanth**
+GitHub: https://github.com/Betha-hemanth
+
+---
+
+## 📄 License
+
+This project is created for learning, practice, and portfolio purposes.
